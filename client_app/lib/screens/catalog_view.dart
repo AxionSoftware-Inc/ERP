@@ -98,7 +98,7 @@ class _CatalogViewState extends State<CatalogView> {
                   itemCode: codeCtrl.text,
                   itemName: nameCtrl.text,
                   itemGroup: 'General',
-                  stockUom: 'Nos',
+                  stockUom: 'dona',
                   standardRate: rate,
                   actualQty: qty,
                 );
@@ -108,6 +108,117 @@ class _CatalogViewState extends State<CatalogView> {
               child: const Text('Saqlash'),
             ),
           ],
+        );
+      },
+    );
+  }
+
+  void _showStockEntryDialog() {
+    if (_items.isEmpty) return;
+    Item selectedItem = _items.first;
+    String entryType = 'Material Receipt'; // or 'Material Issue'
+    final qtyCtrl = TextEditingController(text: '10');
+    final purposeCtrl = TextEditingController(text: 'Zavod/ta\'minotchidan tovar kirimi');
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) {
+        return StatefulBuilder(
+          builder: (builderCtx, setDialogState) {
+            final isReceipt = entryType == 'Material Receipt';
+
+            return AlertDialog(
+              title: Text(isReceipt ? 'Omborga Tovar Kirim Qilish' : 'Ombordan Chiqim Qilish'),
+              content: SizedBox(
+                width: 440,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Operation Type Switcher
+                    SegmentedButton<String>(
+                      segments: const [
+                        ButtonSegment(value: 'Material Receipt', label: Text('Kirim (+)')),
+                        ButtonSegment(value: 'Material Issue', label: Text('Chiqim (-)')),
+                      ],
+                      selected: {entryType},
+                      onSelectionChanged: (set) {
+                        setDialogState(() {
+                          entryType = set.first;
+                          purposeCtrl.text = entryType == 'Material Receipt'
+                              ? 'Zavod/ta\'minotchidan tovar kirimi'
+                              : 'Brak yoki ehtiyoj uchun chiqim';
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
+                    const Text('Tovarni tanlang:', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<Item>(
+                      initialValue: selectedItem,
+                      items: _items.map((it) {
+                        return DropdownMenuItem(
+                          value: it,
+                          child: Text('${it.itemName} (Mavjud: ${it.actualQty.toInt()})'),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        if (val != null) setDialogState(() => selectedItem = val);
+                      },
+                      decoration: const InputDecoration(border: OutlineInputBorder()),
+                    ),
+                    const SizedBox(height: 16),
+
+                    TextField(
+                      controller: qtyCtrl,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: 'Miqdor (${selectedItem.stockUom})',
+                        border: const OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    TextField(
+                      controller: purposeCtrl,
+                      decoration: const InputDecoration(
+                        labelText: 'Sabab / Izoh',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogCtx),
+                  child: const Text('Bekor qilish'),
+                ),
+                FilledButton(
+                  onPressed: () async {
+                    final qty = double.tryParse(qtyCtrl.text) ?? 0.0;
+                    if (qty <= 0) return;
+
+                    Navigator.pop(dialogCtx);
+                    final ok = await widget.api.createStockEntry(
+                      stockEntryType: entryType,
+                      itemCode: selectedItem.itemCode,
+                      qty: qty,
+                      purpose: purposeCtrl.text,
+                    );
+                    if (ok && mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Ombor harakati saqlandi! Qoldiq yangilandi.')),
+                      );
+                      _load();
+                    }
+                  },
+                  child: const Text('Tasdiqlash'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -134,10 +245,20 @@ class _CatalogViewState extends State<CatalogView> {
                               fontWeight: FontWeight.bold,
                             ),
                       ),
-                      FilledButton.icon(
-                        onPressed: _showAddItemDialog,
-                        icon: const Icon(Icons.add),
-                        label: const Text('Yangi Tovar'),
+                      Row(
+                        children: [
+                          OutlinedButton.icon(
+                            onPressed: _showStockEntryDialog,
+                            icon: const Icon(Icons.sync_alt),
+                            label: const Text('Kirim / Chiqim'),
+                          ),
+                          const SizedBox(width: 8),
+                          FilledButton.icon(
+                            onPressed: _showAddItemDialog,
+                            icon: const Icon(Icons.add),
+                            label: const Text('Yangi Tovar'),
+                          ),
+                        ],
                       ),
                     ],
                   ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'services/api_service.dart';
 import 'screens/dashboard_view.dart';
+import 'screens/pos_terminal_view.dart';
 import 'screens/sales_view.dart';
 import 'screens/catalog_view.dart';
 import 'screens/customers_view.dart';
@@ -51,12 +52,13 @@ class _MainShellState extends State<MainShell> {
       DashboardView(
         api: _api,
         onNavigateToSales: () => setState(() => _selectedIndex = 1),
-        onNavigateToCatalog: () => setState(() => _selectedIndex = 2),
+        onNavigateToCatalog: () => setState(() => _selectedIndex = 3),
       ),
-      SalesView(api: _api),
-      CatalogView(api: _api),
-      CustomersView(api: _api),
-      IntegrationsView(api: _api),
+      PosTerminalView(api: _api), // Tab 1: POS Terminal
+      SalesView(api: _api),       // Tab 2: Sales Orders
+      CatalogView(api: _api),     // Tab 3: Catalog & Stock
+      CustomersView(api: _api),   // Tab 4: Customers & CRM
+      IntegrationsView(api: _api),// Tab 5: Integrations
     ];
 
     if (isDesktop) {
@@ -79,7 +81,7 @@ class _MainShellState extends State<MainShell> {
                     if (MediaQuery.of(context).size.width >= 1100) ...[
                       const SizedBox(width: 12),
                       const Text(
-                        'NEXT ERP',
+                        'AXION ERP',
                         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                       ),
                     ],
@@ -95,7 +97,12 @@ class _MainShellState extends State<MainShell> {
                 NavigationRailDestination(
                   icon: Icon(Icons.point_of_sale_outlined),
                   selectedIcon: Icon(Icons.point_of_sale),
-                  label: Text('Sotuvlar'),
+                  label: Text('POS Kassa'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.receipt_long_outlined),
+                  selectedIcon: Icon(Icons.receipt_long),
+                  label: Text('Buyurtmalar'),
                 ),
                 NavigationRailDestination(
                   icon: Icon(Icons.inventory_2_outlined),
@@ -135,6 +142,11 @@ class _MainShellState extends State<MainShell> {
           NavigationDestination(
             icon: Icon(Icons.point_of_sale_outlined),
             selectedIcon: Icon(Icons.point_of_sale),
+            label: 'POS',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.receipt_long_outlined),
+            selectedIcon: Icon(Icons.receipt_long),
             label: 'Sotuvlar',
           ),
           NavigationDestination(

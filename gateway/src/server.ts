@@ -6,6 +6,7 @@ import { salesRouter } from './routes/sales.js';
 import { customersRouter } from './routes/customers.js';
 import { accountingRouter } from './routes/accounting.js';
 import { integrationsRouter } from './routes/integrations.js';
+import { systemRouter } from './routes/system.js';
 
 const app = express();
 
@@ -27,7 +28,7 @@ app.get('/health', (req, res) => {
   res.json({
     status: 'online',
     service: 'ERP Enterprise Gateway',
-    version: '1.0.0',
+    version: '1.1.0',
     erpnextTarget: config.erpnextUrl,
     mode: config.devMockMode ? 'Dev Mock Mode (Offline ready)' : 'Live ERPNext Connection',
     timestamp: new Date().toISOString(),
@@ -40,6 +41,7 @@ app.use('/api/v1/sales', salesRouter);
 app.use('/api/v1/crm/customers', customersRouter);
 app.use('/api/v1/accounting', accountingRouter);
 app.use('/api/v1/integrations', integrationsRouter);
+app.use('/api/v1/system', systemRouter);
 
 // Start server
 app.listen(config.port, () => {

@@ -19,9 +19,7 @@ class ApiService {
           return DashboardStats.fromJson(body['data']);
         }
       }
-    } catch (e) {
-      // ignore
-    }
+    } catch (_) {}
     return DashboardStats(
       totalRevenue: 15150.0,
       ordersCount: 3,
@@ -29,6 +27,22 @@ class ApiService {
       customersCount: 4,
       lowStockCount: 1,
     );
+  }
+
+  // -------------------------------------------------------------
+  // Exchange Rate (USD <-> UZS)
+  // -------------------------------------------------------------
+  Future<double> getExchangeRate() async {
+    try {
+      final res = await http.get(Uri.parse('$baseUrl/system/exchange-rate'));
+      if (res.statusCode == 200) {
+        final body = jsonDecode(res.body);
+        if (body['success'] == true) {
+          return (body['data']['rate'] as num?)?.toDouble() ?? 12850.0;
+        }
+      }
+    } catch (_) {}
+    return 12850.0;
   }
 
   // -------------------------------------------------------------
@@ -61,6 +75,33 @@ class ApiService {
       }
     } catch (_) {}
     return null;
+  }
+
+  // -------------------------------------------------------------
+  // Stock Entry (Ombor Kirim / Chiqim)
+  // -------------------------------------------------------------
+  Future<bool> createStockEntry({
+    required String stockEntryType, // 'Material Receipt' | 'Material Issue'
+    required String itemCode,
+    required double qty,
+    required String purpose,
+  }) async {
+    try {
+      final res = await http.post(
+        Uri.parse('$baseUrl/catalog/stock-entry'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'stock_entry_type': stockEntryType,
+          'purpose': purpose,
+          'items': [
+            {'item_code': itemCode, 'qty': qty}
+          ],
+        }),
+      );
+      return res.statusCode == 201 || res.statusCode == 200;
+    } catch (_) {
+      return false;
+    }
   }
 
   // -------------------------------------------------------------
@@ -104,7 +145,7 @@ class ApiService {
   }
 
   // -------------------------------------------------------------
-  // Sales Orders
+  // Sales Orders & POS Checkout
   // -------------------------------------------------------------
   Future<List<SalesOrder>> getSalesOrders() async {
     try {
@@ -138,6 +179,35 @@ class ApiService {
       if (res.statusCode == 201 || res.statusCode == 200) {
         final body = jsonDecode(res.body);
         return SalesOrder.fromJson(body['data']);
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  Future<Map<String, dynamic>?> posCheckout({
+    required String customer,
+    required String customerName,
+    required List<SalesOrderItem> items,
+    required String paymentMethod,
+    required String currency,
+    double? paidAmount,
+  }) async {
+    try {
+      final res = await http.post(
+        Uri.parse('$baseUrl/sales/pos-checkout'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'customer': customer,
+          'customer_name': customerName,
+          'items': items.map((i) => i.toJson()).toList(),
+          'payment_method': paymentMethod,
+          'currency': currency,
+          'paid_amount': paidAmount,
+        }),
+      );
+      if (res.statusCode == 201 || res.statusCode == 200) {
+        final body = jsonDecode(res.body);
+        return body['data'];
       }
     } catch (_) {}
     return null;

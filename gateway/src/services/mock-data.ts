@@ -27,6 +27,8 @@ export interface ERPSalesOrder {
   transaction_date: string;
   delivery_date: string;
   grand_total: number;
+  currency: 'USD' | 'UZS';
+  payment_method: string;
   status: 'Draft' | 'Submitted' | 'To Deliver and Bill' | 'Completed' | 'Cancelled';
   items: {
     item_code: string;
@@ -48,13 +50,25 @@ export interface ERPSalesInvoice {
   status: 'Draft' | 'Unpaid' | 'Overdue' | 'Paid' | 'Cancelled';
 }
 
+export interface ERPStockEntry {
+  name: string;
+  stock_entry_type: 'Material Receipt' | 'Material Issue' | 'Material Transfer';
+  posting_date: string;
+  purpose: string;
+  items: {
+    item_code: string;
+    item_name: string;
+    qty: number;
+  }[];
+}
+
 export const mockItems: ERPItem[] = [
   {
     name: 'ITEM-001',
     item_code: 'LAP-THINKPAD-X1',
     item_name: 'Lenovo ThinkPad X1 Carbon Gen 11',
     item_group: 'Computers & Laptops',
-    stock_uom: 'Nos',
+    stock_uom: 'dona',
     standard_rate: 1499.00,
     actual_qty: 24,
     description: '14" WUXGA, Core i7, 32GB RAM, 1TB SSD',
@@ -64,7 +78,7 @@ export const mockItems: ERPItem[] = [
     item_code: 'LAP-MBP-16',
     item_name: 'Apple MacBook Pro 16" M3 Max',
     item_group: 'Computers & Laptops',
-    stock_uom: 'Nos',
+    stock_uom: 'dona',
     standard_rate: 2499.00,
     actual_qty: 12,
     description: 'Apple M3 Max, 36GB RAM, 1TB SSD, Space Black',
@@ -74,7 +88,7 @@ export const mockItems: ERPItem[] = [
     item_code: 'MON-DELL-32',
     item_name: 'Dell UltraSharp U3223QE 4K Monitor',
     item_group: 'Displays & Monitors',
-    stock_uom: 'Nos',
+    stock_uom: 'dona',
     standard_rate: 789.00,
     actual_qty: 38,
     description: '32-inch 4K IPS Black, USB-C Hub, 90W PD',
@@ -84,7 +98,7 @@ export const mockItems: ERPItem[] = [
     item_code: 'CHR-AERON-PRO',
     item_name: 'Herman Miller Aeron Ergonomic Chair',
     item_group: 'Office Furniture',
-    stock_uom: 'Nos',
+    stock_uom: 'dona',
     standard_rate: 1250.00,
     actual_qty: 15,
     description: 'PostureFit SL lumbar support, fully adjustable arms',
@@ -94,7 +108,7 @@ export const mockItems: ERPItem[] = [
     item_code: 'DSK-STAND-PRO',
     item_name: 'FlexiSpot Dual-Motor Electric Standing Desk',
     item_group: 'Office Furniture',
-    stock_uom: 'Nos',
+    stock_uom: 'dona',
     standard_rate: 499.00,
     actual_qty: 19,
     description: 'Solid walnut top 60x30", 4 memory presets',
@@ -104,7 +118,7 @@ export const mockItems: ERPItem[] = [
     item_code: 'ACC-MX-MASTER',
     item_name: 'Logitech MX Master 3S Wireless Mouse',
     item_group: 'Accessories',
-    stock_uom: 'Nos',
+    stock_uom: 'dona',
     standard_rate: 99.00,
     actual_qty: 85,
     description: 'Ergonomic performance mouse, 8K DPI sensor',
@@ -116,7 +130,7 @@ export const mockCustomers: ERPCustomer[] = [
     name: 'CUST-0001',
     customer_name: 'Acme Global Technologies Inc',
     customer_group: 'Commercial',
-    territory: 'Tashkent, Uzbekistan',
+    territory: 'Toshkent shahri',
     email_id: 'procurement@acmeglobal.com',
     mobile_no: '+998 90 123 45 67',
     outstanding_amount: 4500.00,
@@ -125,7 +139,7 @@ export const mockCustomers: ERPCustomer[] = [
     name: 'CUST-0002',
     customer_name: 'Silk Road Trading House',
     customer_group: 'Commercial',
-    territory: 'Samarkand, Uzbekistan',
+    territory: 'Samarqand viloyati',
     email_id: 'supply@silkroad.uz',
     mobile_no: '+998 93 987 65 43',
     outstanding_amount: 0.00,
@@ -134,7 +148,7 @@ export const mockCustomers: ERPCustomer[] = [
     name: 'CUST-0003',
     customer_name: 'NextGen Cloud Solutions',
     customer_group: 'Enterprise',
-    territory: 'Tashkent, Uzbekistan',
+    territory: 'Toshkent shahri',
     email_id: 'finance@nextgencloud.io',
     mobile_no: '+998 97 555 44 33',
     outstanding_amount: 3600.00,
@@ -143,7 +157,7 @@ export const mockCustomers: ERPCustomer[] = [
     name: 'CUST-0004',
     customer_name: 'Apex Logistic Express',
     customer_group: 'Logistics',
-    territory: 'Fergana, Uzbekistan',
+    territory: 'Farg\'ona viloyati',
     email_id: 'ops@apexexpress.uz',
     mobile_no: '+998 91 222 33 44',
     outstanding_amount: 1200.00,
@@ -158,6 +172,8 @@ export const mockSalesOrders: ERPSalesOrder[] = [
     transaction_date: '2026-02-10',
     delivery_date: '2026-02-18',
     grand_total: 4497.00,
+    currency: 'USD',
+    payment_method: 'Bank Wire',
     status: 'Submitted',
     items: [
       {
@@ -176,6 +192,8 @@ export const mockSalesOrders: ERPSalesOrder[] = [
     transaction_date: '2026-02-11',
     delivery_date: '2026-02-20',
     grand_total: 7497.00,
+    currency: 'USD',
+    payment_method: 'Karta',
     status: 'To Deliver and Bill',
     items: [
       {
@@ -194,6 +212,8 @@ export const mockSalesOrders: ERPSalesOrder[] = [
     transaction_date: '2026-02-05',
     delivery_date: '2026-02-10',
     grand_total: 3156.00,
+    currency: 'USD',
+    payment_method: 'Payme',
     status: 'Completed',
     items: [
       {
@@ -229,3 +249,35 @@ export const mockSalesInvoices: ERPSalesInvoice[] = [
     status: 'Paid',
   },
 ];
+
+export const mockStockEntries: ERPStockEntry[] = [
+  {
+    name: 'STE-2026-0001',
+    stock_entry_type: 'Material Receipt',
+    posting_date: '2026-02-01',
+    purpose: 'Zavoddan tovar kirimi',
+    items: [
+      {
+        item_code: 'LAP-THINKPAD-X1',
+        item_name: 'Lenovo ThinkPad X1 Carbon Gen 11',
+        qty: 30,
+      },
+    ],
+  },
+];
+
+export function adjustItemStock(itemCode: string, qtyDelta: number): boolean {
+  const item = mockItems.find((it) => it.item_code === itemCode || it.name === itemCode);
+  if (!item) return false;
+  item.actual_qty = Math.max(0, item.actual_qty + qtyDelta);
+  return true;
+}
+
+export function adjustCustomerBalance(customerIdentifier: string, debtDelta: number): boolean {
+  const customer = mockCustomers.find(
+    (c) => c.name === customerIdentifier || c.customer_name === customerIdentifier
+  );
+  if (!customer) return false;
+  customer.outstanding_amount = Math.max(0, customer.outstanding_amount + debtDelta);
+  return true;
+}
